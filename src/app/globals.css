@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0f;
+  --foreground: #ededed;
+  --primary: #3b82f6;
+  --primary-dark: #1e40af;
+  --orangered: #ff4500;
+  --dark-800: #141420;
+  --dark-700: #1e1e2d;
+  --dark-600: #2a2a3a;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-orangered: var(--orangered);
+  --color-dark-800: var(--dark-800);
+  --color-dark-700: var(--dark-700);
+  --color-dark-600: var(--dark-600);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Classes personnalisées */
+.bg-gradient-dark {
+  background: linear-gradient(to bottom right, var(--dark-800), var(--background));
+}
+
+.bg-gradient-card {
+  background: linear-gradient(to bottom right, var(--dark-700), var(--dark-800));
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(to right, var(--primary-dark), var(--primary));
+}
+
+.bg-gradient-orangered {
+  background: linear-gradient(to right, #e03c00, var(--orangered));
+}
+
+body {
+  @apply bg-background text-foreground font-sans;
+}
+
+/* Animation personnalisée */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
