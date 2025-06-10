@@ -1,19 +1,40 @@
-import { DiscordChannel } from '@/lib/discord';
 import { Hash, Volume2, Lock } from 'lucide-react';
+import { DiscordChannel } from '@/lib/discord/types';
+import { Skeleton } from '../ui/skeleton';
 
 interface ChannelListProps {
   channels: DiscordChannel[];
-  selectedChannelId: string | null;
-  onSelect: (channelId: string) => void;
+  selectedChannelId?: string;
+  onSelect?: (channelId: string) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function ChannelList({ channels, selectedChannelId, onSelect, className }: ChannelListProps) {
+export function ChannelList({ 
+  channels, 
+  selectedChannelId, 
+  onSelect, 
+  className,
+  isLoading 
+}: ChannelListProps) {
   const textChannels = channels.filter(c => c.type === 0);
   const voiceChannels = channels.filter(c => c.type === 2);
 
+  if (isLoading) {
+    return (
+      <div className={`bg-gray-800 rounded-lg p-4 ${className}`}>
+        <h3 className="text-lg font-semibold text-white mb-4">Salons</h3>
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`bg-dark-800 rounded-lg p-4 ${className}`}>
+    <div className={`bg-gray-800 rounded-lg p-4 ${className}`}>
       <h3 className="text-lg font-semibold text-white mb-4">Salons</h3>
       
       <div className="mb-6">
@@ -24,11 +45,11 @@ export function ChannelList({ channels, selectedChannelId, onSelect, className }
           {textChannels.map(channel => (
             <div
               key={channel.id}
-              onClick={() => onSelect(channel.id)}
+              onClick={() => onSelect?.(channel.id)}
               className={`px-3 py-2 rounded-md cursor-pointer flex items-center ${
                 selectedChannelId === channel.id
-                  ? 'bg-primary-500/20 text-white'
-                  : 'text-gray-300 hover:bg-dark-700'
+                  ? 'bg-blue-500/20 text-white'
+                  : 'text-gray-300 hover:bg-gray-700'
               }`}
             >
               {channel.nsfw && <Lock className="w-3 h-3 mr-1 text-red-400" />}
@@ -46,7 +67,7 @@ export function ChannelList({ channels, selectedChannelId, onSelect, className }
           {voiceChannels.map(channel => (
             <div
               key={channel.id}
-              className="px-3 py-2 rounded-md text-gray-300 hover:bg-dark-700 cursor-pointer flex items-center"
+              className="px-3 py-2 rounded-md text-gray-300 hover:bg-gray-700 cursor-pointer flex items-center"
             >
               <span className="truncate">{channel.name}</span>
             </div>

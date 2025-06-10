@@ -1,4 +1,3 @@
-// lib/discord/types.ts
 export interface DiscordGuild {
   id: string;
   name: string;

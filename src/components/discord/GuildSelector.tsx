@@ -1,42 +1,58 @@
-import { DiscordGuild } from '@/lib/discord';
-import Image from 'next/image';
+import { DiscordGuild } from '@/lib/discord/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface GuildSelectorProps {
   guilds: DiscordGuild[];
-  selectedGuildId: string | null;
-  onSelect: (guildId: string) => void;
+  selectedGuildId?: string;
+  onSelect?: (guildId: string) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function GuildSelector({ guilds, selectedGuildId, onSelect, className }: GuildSelectorProps) {
+export function GuildSelector({ 
+  guilds, 
+  selectedGuildId, 
+  onSelect, 
+  className,
+  isLoading 
+}: GuildSelectorProps) {
+  if (isLoading) {
+    return (
+      <div className={`rounded-lg p-4 ${className}`}>
+        <h3 className="text-lg font-semibold text-white mb-4">Serveurs Discord</h3>
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`bg-dark-800 rounded-lg p-4 ${className}`}>
+    <div className={`rounded-lg p-4 ${className}`}>
       <h3 className="text-lg font-semibold text-white mb-4">Serveurs Discord</h3>
       
       <div className="space-y-2 max-h-96 overflow-y-auto">
         {guilds.map(guild => (
           <div
             key={guild.id}
-            onClick={() => onSelect(guild.id)}
+            onClick={() => onSelect?.(guild.id)}
             className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
               selectedGuildId === guild.id
-                ? 'bg-primary-500/20 border border-primary-500'
-                : 'bg-dark-700 hover:bg-dark-600'
+                ? 'border border-blue-500'
+                : 'hover:bg-gray-600'
             }`}
           >
-            <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-white">
               {guild.icon ? (
-                <Image
-                  src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=80`}
+                <img 
+                  src={guild.icon}
                   alt={guild.name}
-                  width={40}
-                  height={40}
-                  className="object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-dark-600 flex items-center justify-center text-white">
-                  {guild.name.charAt(0)}
-                </div>
+                guild.name.charAt(0)
               )}
             </div>
             <div className="ml-3 overflow-hidden">

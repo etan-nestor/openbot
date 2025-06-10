@@ -1,188 +1,182 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
-import { MessageSquare, Send, RefreshCw } from 'lucide-react'
-
+import { MessageSquare, Send, Smile, Plus, Menu, Bot, User } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
 
 const ChatPage = () => {
-  const [messages, setMessages] = useState<Array<{
-    id: string;
-    author: string;
-    content: string;
-    timestamp: string;
-    avatar: string;
-  }>>([])
-  const [loading, setLoading] = useState(true)
-  const [input, setInput] = useState('')
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      sender: 'bot',
+      name: 'Support',
+      text: 'Hello! How can I help you today?',
+      time: '10:00 AM',
+      accent: 'orange' // Nouveau: couleur d'accent
+    },
+    {
+      id: 2,
+      sender: 'user',
+      name: 'You',
+      text: 'I need help with my account',
+      time: '10:02 AM',
+      accent: 'indigo'
+    },
+    {
+      id: 3,
+      sender: 'bot',
+      name: 'Support',
+      text: 'Sure! What do you need?',
+      time: '10:03 AM',
+      accent: 'green' // Nouveau: couleur d'accent
+    }
+  ])
+  const [newMessage, setNewMessage] = useState('')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Simuler le chargement des messages
-    const fetchMessages = async () => {
-      setLoading(true)
-      try {
-        // En production, vous utiliseriez une vraie API
-        // const response = await fetch('/api/chat/messages')
-        // const data = await response.json()
-        
-        // Simulation
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const mockMessages = [
-          {
-            id: '1',
-            author: 'OpenBot',
-            content: 'Hello! How can I help you today?',
-            timestamp: '2023-05-15T14:30:00Z',
-            avatar: 'https://i.imgur.com/abcdefg.png'
-          },
-          {
-            id: '2',
-            author: 'User123',
-            content: 'I need help with the music commands',
-            timestamp: '2023-05-15T14:32:00Z',
-            avatar: 'https://i.imgur.com/hijklmn.png'
-          }
-        ]
-        setMessages(mockMessages)
-      } catch (error) {
-        console.error('Failed to fetch messages:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchMessages()
-  }, [])
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSend = () => {
-    if (input.trim()) {
-      const newMessage = {
-        id: Date.now().toString(),
-        author: 'You',
-        content: input,
-        timestamp: new Date().toISOString(),
-        avatar: 'https://i.imgur.com/opqrstu.png'
+    if (newMessage.trim()) {
+      const accents = ['orange', 'green', 'indigo', 'purple']
+      const randomAccent = accents[Math.floor(Math.random() * accents.length)]
+
+      const newMsg = {
+        id: messages.length + 1,
+        sender: 'user',
+        name: 'You',
+        text: newMessage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        accent: 'indigo'
       }
-      setMessages([...messages, newMessage])
-      setInput('')
-      
-      // Simuler une réponse du bot
+
+      setMessages([...messages, newMsg])
+      setNewMessage('')
+
       setTimeout(() => {
-        const botReply = {
-          id: (Date.now() + 1).toString(),
-          author: 'OpenBot',
-          content: `I received: "${input}"`,
-          timestamp: new Date().toISOString(),
-          avatar: 'https://i.imgur.com/abcdefg.png'
-        }
-        setMessages(prev => [...prev, botReply])
+        setMessages(prev => [...prev, {
+          id: prev.length + 2,
+          sender: 'bot',
+          name: 'Support',
+          text: `Thanks for your message! We'll get back to you soon.`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          accent: randomAccent // Couleur aléatoire pour le bot
+        }])
       }, 1000)
     }
   }
 
-  const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  // Fonction pour les classes de couleur
+  const getAccentColor = (accent: string, type: 'bg' | 'text' | 'border') => {
+    switch (accent) {
+      case 'orange': return `${type}-orange-500 ${type}-opacity-20`
+      case 'green': return `${type}-emerald-500 ${type}-opacity-20`
+      case 'purple': return `${type}-purple-500 ${type}-opacity-20`
+      default: return `${type}-indigo-500 ${type}-opacity-20`
+    }
   }
 
   return (
-    <div className="min-h-screen flex">
-      <motion.main 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="flex-1 p-6 overflow-y-auto ml-20 md:ml-64 transition-all duration-300 flex flex-col"
-      >
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-            <MessageSquare className="w-8 h-8 text-primary-500" />
-            Chat with OpenBot
+    <div className="min-h-screen bg-gradient-to-b from-dark-900 to-dark-950 text-white">
+      {/* Header transparent avec bordure subtile */}
+      <header className="p-4 flex items-center justify-between sticky top-0 z-30">
+        <div className="flex items-center space-x-3">
+          <MessageSquare className="w-5 h-5 text-indigo-400" />
+          <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+            Chat
           </h1>
-          
-          <motion.button
-            whileHover={{ rotate: 180 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => window.location.reload()}
-            className="p-2 rounded-lg hover:bg-dark-700 transition-all"
-            disabled={loading}
-          >
-            <RefreshCw className={`w-5 h-5 text-gray-300 ${loading ? 'animate-spin' : ''}`} />
-          </motion.button>
         </div>
+        <button className="p-2 rounded-full hover:bg-gray-800/50 transition-colors">
+          <Menu className="w-5 h-5 text-gray-400" />
+        </button>
+      </header>
 
-        <div className="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6 overflow-y-auto">
-          {loading ? (
-            <div className="flex justify-center items-center h-full">
-              <div className="animate-pulse text-gray-400">Loading messages...</div>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <MessageSquare className="w-12 h-12 text-gray-500 mb-4" />
-              <h3 className="text-xl font-medium text-gray-400 mb-2">No messages yet</h3>
-              <p className="text-gray-500 max-w-md">
-                Start a conversation with OpenBot by sending a message below.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${message.author === 'You' || message.author === 'User123' ? 'justify-end' : 'justify-start'}`}
+      {/* Zone de chat principale */}
+      <main className="max-w-4xl mx-auto p-4 md:p-6 h-[calc(100vh-120px)] flex flex-col">
+        <div className="flex-1 rounded-lg overflow-y-auto custom-scrollbar space-y-4">
+          <AnimatePresence>
+            {messages.map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`p-3 rounded-lg max-w-xs md:max-w-md relative overflow-hidden ${message.sender === 'user'
+                    ? 'bg-gray-800/60 border-l-4 border-indigo-500/50'
+                    : `bg-gray-800/40 ${getAccentColor(message.accent, 'border')} border-l-4`
+                    }`}
                 >
-                  <div 
-                    className={`flex max-w-[80%] md:max-w-[70%] ${message.author === 'You' || message.author === 'User123' ? 'flex-row-reverse' : 'flex-row'} items-start gap-3`}
-                  >
-                    <img 
-                      src={message.avatar} 
-                      alt={message.author}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div 
-                      className={`p-3 rounded-lg ${message.author === 'You' || message.author === 'User123' ? 'bg-primary-900/30 border border-primary-500/50' : 'bg-dark-700 border border-dark-600'}`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-white">{message.author}</span>
-                        <span className="text-xs text-gray-400">{formatTime(message.timestamp)}</span>
-                      </div>
-                      <p className="text-gray-200">{message.content}</p>
+                  {/* Barre d'accent colorée */}
+                  <div className={`absolute left-0 top-0 h-full w-1 ${getAccentColor(message.accent, 'bg')}`} />
+
+                  <div className="relative z-10">
+                    <div className="flex items-center space-x-2 mb-1">
+                      {message.sender === 'bot' ? (
+                        <Bot className={`w-4 h-4 ${getAccentColor(message.accent, 'text')}`} />
+                      ) : (
+                        <User className="w-4 h-4 text-indigo-400" />
+                      )}
+                      <span className="text-xs font-medium text-gray-300">{message.name}</span>
                     </div>
+                    <p className="text-white/90">{message.text}</p>
+                    <p className="text-xs text-gray-400 mt-1 text-right">{message.time}</p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          <div ref={messagesEndRef} />
         </div>
 
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-dark-800 rounded-xl p-4 border border-dark-700"
-        >
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type a message..."
-              className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+        {/* Zone de saisie avec touches de couleur */}
+        <div className="mt-4 bg-gray-800/30 rounded-lg p-2 border border-gray-700/30 backdrop-blur-sm">
+          <div className="flex gap-2">
+            <button className="p-2 rounded-lg bg-gray-700/30 hover:bg-orange-500/20 transition-colors">
+              <Plus className="w-5 h-5 text-orange-400/80" />
+            </button>
+
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Type your message..."
+                className="w-full bg-gray-700/20 border border-gray-600/30 rounded-lg px-4 py-3 pr-12 text-white focus:outline-none focus:ring-1 focus:ring-green-500/30 placeholder-gray-400/60 transition-all"
+              />
+              <button className="absolute right-3 top-3 text-gray-400 hover:text-purple-400/80 transition-colors">
+                <Smile className="w-5 h-5" />
+              </button>
+            </div>
+
+            <button
               onClick={handleSend}
-              disabled={!input.trim()}
-              className="bg-primary-600 hover:bg-primary-500 text-white p-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              disabled={!newMessage.trim()}
+              className={`p-2 rounded-lg bg-indigo-500/30 hover:bg-indigo-500/40 transition-all ${!newMessage.trim() ? 'opacity-50' : ''}`}
             >
-              <Send className="w-5 h-5" />
-            </motion.button>
+              <Send className="w-5 h-5 text-indigo-300" />
+            </button>
           </div>
-        </motion.div>
-      </motion.main>
+        </div>
+      </main>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.3);
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   )
 }
